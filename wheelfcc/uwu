@@ -1,0 +1,51 @@
+import os
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def download_image(chapter_number, img_url, i, folder_name='all_images'):
+    try:
+        # Utilisez directement l'URL de l'image sans urljoin
+        img_name = os.path.basename(urlparse(img_url).path)
+        img_data = requests.get(img_url).content
+        img_path = os.path.join(folder_name, f'image_{chapter_number}_{i + 1}_{img_name}')
+
+        with open(img_path, 'wb') as img_file:
+            img_file.write(img_data)
+
+        print(f"Image {i + 1} du chapitre {chapter_number} téléchargée avec succès.")
+    except Exception as e:
+        print(f"Erreur lors du téléchargement de l'image {i + 1} du chapitre {chapter_number}: {e}")
+
+
+def scrape_images_from_chapter(chapter_number, folder_name='all_images'):
+    chapter_url = f'https://manhwahentai.me/webtoon/a-wonderful-new-world-webtoon-manhwa-hentai-manhwa0017/chapter-{chapter_number}/'
+    print(f"Fetching images from: {chapter_url}")
+
+    response = requests.get(chapter_url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        img_tags = soup.find_all('img')
+
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+
+        # Utilisation de ThreadPoolExecutor pour télécharger les images en parallèle
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(download_image, chapter_number, img_tag['src'], i, folder_name) for i, img_tag in enumerate(img_tags)]
+
+            # Attendre que toutes les tâches soient terminées
+            for future in as_completed(futures):
+                future.result()
+
+        print(f"Images du chapitre {chapter_number} téléchargées avec succès.")
+    else:
+        print(f"Échec de la requête pour le chapitre {chapter_number}. Code d'état : {response.status_code}")
+
+# Exemple : Télécharger les images pour chaque chapitre dans la plage définie
+start_chapter = 1
+end_chapter = 1000
+for chapter_number in range(start_chapter, end_chapter + 1):
+    scrape_images_from_chapter(chapter_number)
