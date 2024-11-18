@@ -1,0 +1,29 @@
+export default function Table_2() {
+  return (
+    <div>
+      <h1>test</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>State</th>
+            <th>Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <tbody>Test</tbody>
+            <tbody>Test</tbody>
+          </tr>
+          <tr>
+            <tbody>Test</tbody>
+            <tbody>Test</tbody>
+          </tr>
+          <tr>
+            <tbody>Test</tbody>
+            <tbody>Test</tbody>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
